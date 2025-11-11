@@ -1,0 +1,29 @@
+class EnergyAgent:
+    def __init__(self): self.energy_usage = 0
+    def manage_energy(self, lights_on, temp):
+        if lights_on and temp > 25:
+            return "Turning off unused lights to save power."
+        return "Energy usage optimal."
+
+class ComfortAgent:
+    def adjust_environment(self, mood):
+        if mood == "tired":
+            return "Dimming lights and playing calm music."
+        elif mood == "active":
+            return "Increasing brightness and activating air purifier."
+        return "Maintaining current settings."
+
+class ConversationAgent:
+    def respond(self, input_text):
+        if "how was my day" in input_text.lower():
+            return "Based on your schedule, you were quite productive today!"
+        return "I'm here if you’d like to talk or adjust something."
+
+# Example interaction
+energy = EnergyAgent()
+comfort = ComfortAgent()
+chat = ConversationAgent()
+
+print(energy.manage_energy(lights_on=True, temp=28))
+print(comfort.adjust_environment(mood="tired"))
+print(chat.respond("How was my day?"))
