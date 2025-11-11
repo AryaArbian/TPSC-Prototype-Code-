@@ -1,29 +1,69 @@
-class EnergyAgent:
-    def __init__(self): self.energy_usage = 0
-    def manage_energy(self, lights_on, temp):
-        if lights_on and temp > 25:
-            return "Turning off unused lights to save power."
-        return "Energy usage optimal."
+import random
 
-class ComfortAgent:
-    def adjust_environment(self, mood):
-        if mood == "tired":
-            return "Dimming lights and playing calm music."
-        elif mood == "active":
-            return "Increasing brightness and activating air purifier."
-        return "Maintaining current settings."
+# Base Agent Class
+class BaseAgent:
+    def __init__(self, name):
+        self.name = name
+    def receive_context(self, context):
+        pass
+    def propose_action(self):
+        return None
 
-class ConversationAgent:
-    def respond(self, input_text):
-        if "how was my day" in input_text.lower():
-            return "Based on your schedule, you were quite productive today!"
-        return "I'm here if you’d like to talk or adjust something."
+# Energy Agent
+class EnergyAgent(BaseAgent):
+    def receive_context(self, context):
+        self.temp = context.get("temperature")
+        self.lights_on = context.get("lights_on")
+    def propose_action(self):
+        if self.temp > 27 and self.lights_on:
+            return ("EnergyAgent", "Turn off some lights to save power.")
+        return ("EnergyAgent", "Energy usage normal.")
 
-# Example interaction
-energy = EnergyAgent()
-comfort = ComfortAgent()
-chat = ConversationAgent()
+# Comfort Agent
+class ComfortAgent(BaseAgent):
+    def receive_context(self, context):
+        self.mood = context.get("mood")
+    def propose_action(self):
+        if self.mood == "tired":
+            return ("ComfortAgent", "Dim lights and play relaxing music.")
+        elif self.mood == "active":
+            return ("ComfortAgent", "Increase brightness and activate air purifier.")
+        return ("ComfortAgent", "No comfort change needed.")
 
-print(energy.manage_energy(lights_on=True, temp=28))
-print(comfort.adjust_environment(mood="tired"))
-print(chat.respond("How was my day?"))
+# Conversation Agent
+class ConversationAgent(BaseAgent):
+    def receive_context(self, context):
+        self.query = context.get("user_query")
+    def propose_action(self):
+        if self.query and "day" in self.query.lower():
+            return ("ConversationAgent", "You had a busy but productive day!")
+        return ("ConversationAgent", "All systems running smoothly.")
+
+# Coordinator Agent - manages decisions and communication
+class Coordinator:
+    def __init__(self, agents):
+        self.agents = agents
+    def process_context(self, context):
+        proposals = []
+        for agent in self.agents:
+            agent.receive_context(context)
+            proposals.append(agent.propose_action())
+        return self.resolve_conflicts(proposals)
+    def resolve_conflicts(self, proposals):
+        # Future versions could prioritize security or comfort dynamically
+        return proposals  # Currently returns all actions for demonstration
+
+# Simulation Example
+context = {
+    "temperature": random.randint(24, 30),
+    "lights_on": True,
+    "mood": "tired",
+    "user_query": "How was my day?"
+}
+
+agents = [EnergyAgent("Energy"), ComfortAgent("Comfort"), ConversationAgent("Conversation")]
+coordinator = Coordinator(agents)
+actions = coordinator.process_context(context)
+
+for agent, action in actions:
+    print(f"[{agent}] → {action}")
